@@ -1,3 +1,13 @@
+// index -> { row, col }
+function i2rc(index) {
+  return { row: Math.floor(index / 9), col: index % 9 };
+}
+
+// { row, col } -> index
+function rc2i(row, col) {
+  return row * 9 + col;
+}
+
 class SudokuSolver {
 
   validate(puzzleString) {
@@ -5,11 +15,11 @@ class SudokuSolver {
 
     if (puzzleString.length !== 81) {
       return { error: 'Expected puzzle to be 81 characters long' };
-    }
+    };
 
     if (!regex.test(puzzleString)) {
       return { error: 'Invalid characters in puzzle' };
-    }
+    };
     return false;
   }
 
@@ -25,30 +35,40 @@ class SudokuSolver {
     return { row, col };
   }
 
-  checkRowPlacement(puzzleString, row, column, value) {
-
+  checkRowPlacement(puzzleString, row, value) {
+    for (let c = 0; c < 9; ++c) {
+      if (puzzleString[rc2i(row - 1, c)] == value) {
+        return 'row';
+      };
+    };
+    return false;
   }
 
-  checkColPlacement(puzzleString, row, column, value) {
-
+  checkColPlacement(puzzleString, column, value) {
+    for (let r = 0; r < 9; ++r) {
+      if (puzzleString[rc2i(r, column - 1)] == value) {
+        return 'column';
+      };
+    };
+    return false;
   }
 
   checkRegionPlacement(puzzleString, row, column, value) {
+    let r1 = Math.floor((row - 1) / 3) * 3;
+    let c1 = Math.floor((column - 1) / 3) * 3;
 
+    for (let r = r1; r < r1 + 3; ++r) {
+      for (let c = c1; c < c1 + 3; ++c) {
+        if (puzzleString[rc2i(r, c)] == value){
+          return 'region';
+        };
+      };
+    };
+    return false;
   }
 
   solve(puzzleString) {
     const board = puzzleString.replace(/\./g, 0).split('').map(i => parseInt(i));
-
-    // index -> { row, col }
-    function i2rc(index) {
-      return { row: Math.floor(index / 9), col: index % 9 };
-    }
-
-    // { row, col } -> index
-    function rc2i(row, col) {
-      return row * 9 + col;
-    }
 
     function getChoices(board, index) {
       let choices = [];
@@ -61,7 +81,7 @@ class SudokuSolver {
         }
       }
       return choices;
-    }
+    };
 
     function unique(board, index, value) {
       let { row, col } = i2rc(index);
@@ -76,7 +96,7 @@ class SudokuSolver {
         }
       }
       return true;
-    }
+    };
 
     function acceptable(board, index, value) {
       let { row, col } = i2rc(index);
@@ -95,11 +115,11 @@ class SudokuSolver {
       for (let r = r1; r < r1 + 3; ++r) {
         for (let c = c1; c < c1 + 3; ++c) {
           if (board[rc2i(r, c)] == value) return false;
-        }
-      }
+        };
+      };
 
       return true;
-    }
+    };
 
     function bestBet(board) {
       let index, moves, bestLen = 100;
@@ -115,7 +135,7 @@ class SudokuSolver {
         }
       }
       return { index, moves };
-    }
+    };
 
     function puzzleSolve() {
       let { index, moves } = bestBet(board);    // find the best place to fill
@@ -126,17 +146,17 @@ class SudokuSolver {
       }
       board[index] = 0;                         // no digit fits here, backtrack!
       return false;
-    }
+    };
 
     console.time();
     const solved = puzzleSolve();
-    console.timeEnd();                                 //...8.1..........435............7.8........1...2..3....6......75..34........2..6..
+    console.timeEnd();    //...8.1..........435............7.8........1...2..3....6......75..34........2..6..
     if (solved) {
       return board.join('');
     } else {
       return false;
-    }
-  }
+    };
+  };
 }
 
 module.exports = SudokuSolver;
