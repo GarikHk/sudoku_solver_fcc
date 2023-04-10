@@ -2,7 +2,7 @@ const chai = require('chai');
 const assert = chai.assert;
 
 const Solver = require('../controllers/sudoku-solver.js');
-const puzzles = require('../controllers/puzzle-strings.js'); 
+const puzzles = require('../controllers/puzzle-strings.js');
 
 let solver = new Solver();
 let puzzle = puzzles.puzzlesAndSolutions[0][0];
@@ -63,7 +63,9 @@ suite('Unit Tests', () => {
 
   // #10
   test('10) Valid puzzle strings pass the solver', () => {
-    assert.strictEqual(solver.solve(puzzle), solution);
+    for (let i = 0; i < puzzles.puzzlesAndSolutions.length; i++) {
+      assert.strictEqual(solver.solve(puzzles.puzzlesAndSolutions[i][0]), puzzles.puzzlesAndSolutions[i][1]);
+    }
   });
 
   // #11
@@ -73,6 +75,6 @@ suite('Unit Tests', () => {
 
   // #12
   test('12) Solver returns the expected solution for an incomplete puzzle', () => {
-    assert.strictEqual(solver.solve(puzzle), solution); //??
+    assert.strictEqual(solver.solve(puzzle), solution);
   });
 });
