@@ -1,9 +1,9 @@
-// index -> { row, col }
+// index => { row, col }
 function i2rc(index) {
   return { row: Math.floor(index / 9), col: index % 9 };
 }
 
-// { row, col } -> index
+// { row, col } => index
 function rc2i(row, col) {
   return row * 9 + col;
 }
@@ -70,46 +70,40 @@ class SudokuSolver {
   solve(puzzleString) {
     const board = puzzleString.replace(/\./g, 0).split('').map(i => parseInt(i));
 
-    function getChoices(board, index) {
+    const getChoices = (board, index) => {
       let choices = [];
       for (let value = 1; value <= 9; ++value) {
         if (acceptable(board, index, value)) {
-          if (unique(board, index, value))
-            return [value]; // it's useless to try anything else
-          else
-            choices.push(value);
-        }
-      }
+          if (unique(board, index, value)) return [value];
+          else choices.push(value);
+        };
+      };
       return choices;
     };
 
-    function unique(board, index, value) {
+    const unique = (board, index, value) => {
       let { row, col } = i2rc(index);
       let r1 = Math.floor(row / 3) * 3;
       let c1 = Math.floor(col / 3) * 3;
+
       for (let r = r1; r < r1 + 3; ++r) {
         for (let c = c1; c < c1 + 3; ++c) {
           let i = rc2i(r, c);
-          if (i != index && !board[i] && acceptable(board, i, value)) {
-            return false;
-          }
-        }
-      }
+          if (i != index && !board[i] && acceptable(board, i, value)) return false;
+        };
+      };
       return true;
     };
 
-    function acceptable(board, index, value) {
+    const acceptable = (board, index, value) => {
       let { row, col } = i2rc(index);
 
-      // if already present on the column, not acceptable
       for (let r = 0; r < 9; ++r)
         if (board[rc2i(r, col)] == value) return false;
 
-      // if already present on the row, not acceptable
       for (let c = 0; c < 9; ++c)
         if (board[rc2i(row, c)] == value) return false;
 
-      // if already present in the same 3x3 square, also not acceptable
       let r1 = Math.floor(row / 3) * 3;
       let c1 = Math.floor(col / 3) * 3;
       for (let r = r1; r < r1 + 3; ++r) {
@@ -121,7 +115,7 @@ class SudokuSolver {
       return true;
     };
 
-    function bestBet(board) {
+    const bestBet = (board) => {
       let index, moves, bestLen = 100;
       for (let i = 0; i < 81; ++i) {
         if (!board[i]) {
@@ -131,27 +125,27 @@ class SudokuSolver {
             moves = m;
             index = i;
             if (bestLen == 0) break;
-          }
-        }
-      }
+          };
+        };
+      };
       return { index, moves };
     };
 
-    function puzzleSolve() {
-      let { index, moves } = bestBet(board);    // find the best place to fill
-      if (index == null) return true;           // we filled'em all, success!
+    const puzzleSolve = () => {
+      let { index, moves } = bestBet(board);
+      if (index == null) return true;
+
       for (let m of moves) {
-        board[index] = m;                       // try one choice
-        if (puzzleSolve()) return true;         // if we solved further, success!
-      }
-      board[index] = 0;                         // no digit fits here, backtrack!
+        board[index] = m;
+        if (puzzleSolve()) return true;
+      };
+
+      board[index] = 0;  //backtrack
       return false;
     };
 
-    console.time();
-    const solved = puzzleSolve();
-    console.timeEnd();    //...8.1..........435............7.8........1...2..3....6......75..34........2..6..
-    if (solved) {
+    //...8.1..........435............7.8........1...2..3....6......75..34........2..6..
+    if (puzzleSolve()) {
       return board.join('');
     } else {
       return false;
